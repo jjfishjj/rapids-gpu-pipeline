@@ -1,12 +1,27 @@
 # RAPIDS GPU Pipeline
 
-以 cuDF、CuPy、cuML 和 RMM 為核心的 GPU-native pipeline 加速比估算器。
+同一支 pipeline 支援 dependency-free CPU 基準與真實 cuDF／CuPy GPU 執行，用來驗證資料常駐、groupby 工作負載與端到端加速，而不只比較單一 kernel。
 
-## 執行
+## CPU 與單元測試
 
-直接開啟 `index.html`，調整 CPU baseline、GPU 核心加速與 host round-trips。
+```bash
+python -m unittest discover -s tests -v
+python src/pipeline.py --rows 100000 --backend cpu
+```
 
-## 實機延伸
+## NVIDIA 實機
 
-以真實 Pandas／NumPy／scikit-learn pipeline 建立基準，再逐段替換並記錄隱性傳輸。
+建議在 NVIDIA RAPIDS container 或對應 CUDA 環境安裝 `requirements-gpu.txt`：
+
+```bash
+python src/pipeline.py --rows 10000000 --backend gpu
+```
+
+`auto` 優先使用 GPU、缺少 RAPIDS 時退回 CPU；`gpu` 在 GPU stack 不完整時直接失敗，適合 CI 驗收。自架 GPU Runner 可手動執行 `gpu.yml`。
+
+## 痛點檢查
+
+- 不要在每一步呼叫 `.to_pandas()`／`.get()`。
+- 將 ingest、轉換、聚合、模型與輸出視為同一條 pipeline。
+- 先觀察資料是否裝得進 GPU，再決定分批、RMM pool 或 Dask-CUDA。
 
