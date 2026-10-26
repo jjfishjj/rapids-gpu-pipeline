@@ -6,6 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: nvidia-smi
-      - run: python src/pipeline.py --rows 10000000 --backend gpu | tee rapids-result.json
+      - run: docker build -t nvidia-lab/rapids .
+      - run: docker run --rm --gpus all --ipc=host nvidia-lab/rapids --rows 10000000 --backend gpu | tee rapids-result.json
       - uses: actions/upload-artifact@v4
         with: {name: rapids-result, path: rapids-result.json}

@@ -17,6 +17,15 @@ python src/pipeline.py --rows 100000 --backend cpu
 python src/pipeline.py --rows 10000000 --backend gpu
 ```
 
+推薦的可重現執行方式：
+
+```bash
+docker build -t nvidia-lab/rapids .
+docker run --rm --gpus all --ipc=host nvidia-lab/rapids --rows 10000000 --backend gpu
+```
+
+Dockerfile 固定 RAPIDS 26.08、CUDA 13、Python 3.12；CUDA 12 使用 `requirements-gpu.txt`，CUDA 13 使用 `requirements-gpu-cu13.txt`。
+
 `auto` 優先使用 GPU、缺少 RAPIDS 時退回 CPU；`gpu` 在 GPU stack 不完整時直接失敗，適合 CI 驗收。自架 GPU Runner 可手動執行 `gpu.yml`。
 
 ## 痛點檢查
